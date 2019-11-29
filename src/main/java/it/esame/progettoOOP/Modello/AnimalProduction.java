@@ -2,12 +2,13 @@ package it.esame.progettoOOP.Modello;
 
 
 import java.io.Serializable;
+import java.util.List;
 
 public class AnimalProduction implements Serializable {
     private String animals, month, unit, geo;
-    private double[] value;
+    private List<Float> value;
 
-    public AnimalProduction(String animals, String month, String unit, String geo, double[] value) {
+    public AnimalProduction(String animals, String month, String unit, String geo, List<Float> value) {
 
         this.animals = animals;
 
@@ -50,7 +51,7 @@ public class AnimalProduction implements Serializable {
     }
 
 
-    public double[] getValori() {
+    public List<Float> getValue() {
         return value;
     }
 
