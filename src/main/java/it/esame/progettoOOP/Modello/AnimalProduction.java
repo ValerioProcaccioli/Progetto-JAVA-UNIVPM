@@ -2,13 +2,14 @@ package it.esame.progettoOOP.Modello;
 
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.List;
 
 public class AnimalProduction implements Serializable {
     private String animals, month, unit, geo;
-    private List<Float> value;
+    private List<Float> anni;
 
-    public AnimalProduction(String animals, String month, String unit, String geo, List<Float> value) {
+    public AnimalProduction(String animals, String month, String unit, String geo, List<Float> anni) {
 
         this.animals = animals;
 
@@ -18,12 +19,12 @@ public class AnimalProduction implements Serializable {
 
         this.geo = geo;
 
-        this.value = value;
+        this.anni = anni;
 
     }
 
 
-    public String getAnimals() {
+   /* public String getAnimals() {
 
         return animals;
 
@@ -49,11 +50,25 @@ public class AnimalProduction implements Serializable {
         return geo;
 
     }
+*/
+   public String getCampo(String nomeCampo){
 
+      switch(nomeCampo)
+      {
+          case "animals": return animals;
+          case "month": return month;
+          case "unit": return unit;
+          case "geo": return geo;
+          default: return "";
+      }
 
-    public List<Float> getValue() {
-        return value;
+   }
+
+    public List<Float> getAnni() {
+        return anni;
     }
+
+    public Float getAnno(Integer pos){return anni.get(pos);}
 
 
     public String toString() {

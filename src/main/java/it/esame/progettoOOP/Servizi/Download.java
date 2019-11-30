@@ -1,12 +1,18 @@
 package it.esame.progettoOOP.Servizi;
 
 import it.esame.progettoOOP.Modello.AnimalProduction;
-import net.minidev.json.JSONValue;
+
+
+
+import org.json.simple.JSONValue;
 import org.apache.tomcat.util.json.ParseException;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
+
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -70,7 +76,7 @@ public class Download {
                     in.close();
                 }
                 //Conversione StringBuilder in oggetto JSON
-                JSONObject obj = (JSONObject) JSONValue.parseWithException(jline.toString());
+                JSONObject obj = (JSONObject) JSONValue.parseWithException(jline);
                 JSONObject objI = (JSONObject) (obj.get("result"));
                 JSONArray objA = (JSONArray) (objI.get("resources"));
 
@@ -88,16 +94,17 @@ public class Download {
                 }
             } catch (IOException | ParseException e) {
                 e.printStackTrace();
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-            //Metadata(fileTSV);
-        Parsing(fileTSV);}
+        //Metadata(fileTSV);
+        Parsing(fileTSV);
+    }
 
     private static void downloadTSV(String url, String NomeFile) throws Exception {
-        try ( InputStream in = URI.create ( url ).toURL().openStream() )  {
-            Files.copy (in, Paths.get( NomeFile ));
+        try (InputStream in = URI.create(url).toURL().openStream()) {
+            Files.copy(in, Paths.get(NomeFile));
         }
     }
 
@@ -136,13 +143,13 @@ public class Download {
                 String month = splittedline[1].trim();
                 String unit = splittedline[2].trim();
                 String geo = splittedline[3].trim();
-                List<Float> value = new ArrayList<>();
+                List<Float> anni = new ArrayList<>();
                 while (i + 4 < splittedline.length) {
-                    value.add(Float.parseFloat(splittedline[4 + i].trim()));
+                    anni.add(Float.parseFloat(splittedline[4 + i].trim()));
                     i++;
                 }
 
-                AnimalProduction parsedObj = new AnimalProduction(animals, month, unit, geo, value);
+                AnimalProduction parsedObj = new AnimalProduction(animals, month, unit, geo, anni);
                 record.add(parsedObj);
             }
 
@@ -152,4 +159,84 @@ public class Download {
         }
 
     }
-}
+    /**
+     * Metodo che restituisce record
+     *
+     * @return record
+     */
+
+    public List<AnimalProduction> getRecord() {
+        return record;
+    }
+
+    /**
+     * Metodo che restituisce la lista dei metadati
+     *
+     * @return anni
+     */
+  //  public List getTime() {
+  //      return time;
+  //  }
+
+    /**
+     * Metodo che restituisce la lista dei metadati
+     *
+     * @return Lista
+     */
+    public List<Map> getMetadata() {
+        return Lista;
+    }
+
+    /**
+     * Metodo che restituisce il record all'indice i
+     *
+     * @param i indice del record
+     * @return restituisce il record all'indice i
+     */
+    public AnimalProduction getRecord(int i) {
+        if (i < record.size()) return record.get(i);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Oggetto di indice " + i + " non esiste!");
+    }
+
+    /**
+     * Metodo che restituisce la lista con i valori di un certo campo dei record
+     *
+     *
+     * @return lista con i valori del campo
+     */
+    public List<Map> getStats()
+    {
+        Field[] fields = AnimalProduction.class.getDeclaredFields();
+        List<Map> list = new ArrayList<>();
+        for(Field f:fields)
+        {
+            list.add(Statistiche.getNumStatistiche(f.getName(),getValues(f.getName())));
+            list.add(Statistiche.getStatistiche(f.getName(),getValues(f.getName())));
+        }
+        return list;
+    }
+
+    public List getValues(String nome)
+    {
+        List<String> Values= new ArrayList<>();
+        for (AnimalProduction a: record)
+        {
+            Values.add(a.getCampo(nome));
+        }
+        return Values;
+    }
+
+    public List getValues(Integer nome)
+    {
+        List<Float> Values= new ArrayList<>();
+        for (AnimalProduction a: record) {
+        Values.add(a.getAnno(2019-nome+4));
+        }
+        return Values;
+        }
+
+    }
+
+
+
+
