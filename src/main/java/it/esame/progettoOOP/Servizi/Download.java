@@ -159,6 +159,7 @@ public class Download {
         }
 
     }
+
     /**
      * Metodo che restituisce record
      *
@@ -174,9 +175,9 @@ public class Download {
      *
      * @return anni
      */
-  //  public List getTime() {
-  //      return time;
-  //  }
+    //  public List getTime() {
+    //      return time;
+    //  }
 
     /**
      * Metodo che restituisce la lista dei metadati
@@ -193,7 +194,7 @@ public class Download {
      * @param i indice del record
      * @return restituisce il record all'indice i
      */
-    public AnimalProduction getRecord(int i) {
+    public static AnimalProduction getRecord(int i) {
         if (i < record.size()) return record.get(i);
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Oggetto di indice " + i + " non esiste!");
     }
@@ -201,42 +202,60 @@ public class Download {
     /**
      * Metodo che restituisce la lista con i valori di un certo campo dei record
      *
-     *
      * @return lista con i valori del campo
      */
-    public List<Map> getStats()
-    {
-        Field[] fields = AnimalProduction.class.getDeclaredFields();
+    public List<Map> getStats(String nomeCampo) {
         List<Map> list = new ArrayList<>();
-        for(Field f:fields)
-        {
-            list.add(Statistiche.getNumStatistiche(f.getName(),getValues(f.getName())));
-            list.add(Statistiche.getStatistiche(f.getName(),getValues(f.getName())));
+        if (nomeCampo.equals("")) {
+            Field[] fields = AnimalProduction.class.getDeclaredFields();
+            int i=0;
+            for (Field f : fields) {
+                if (f.equals("anni") )
+                {list.add(Statistiche.getNumStatistiche(f.getName(), getValues(2019-i,record)));
+                i++;}
+                else {list.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(),record)));}
+            }
+        } else {
+            if(Integer.parseInt(nomeCampo)>1000)
+            {list.add(Statistiche.getNumStatistiche(nomeCampo, getValues(Integer.parseInt(nomeCampo), record)));}
+            else{list.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, record)));}
         }
         return list;
     }
 
-    public List getValues(String nome)
-    {
-        List<String> Values= new ArrayList<>();
-        for (AnimalProduction a: record)
-        {
+    public List getValues(String nome, List<AnimalProduction> lista) {
+        List<String> Values = new ArrayList<>();
+        for (AnimalProduction a : lista) {
             Values.add(a.getCampo(nome));
         }
         return Values;
     }
 
-    public List getValues(Integer nome)
-    {
-        List<Float> Values= new ArrayList<>();
-        for (AnimalProduction a: record) {
-        Values.add(a.getAnno(2019-nome+4));
+    public List getValues(Integer nome, List<AnimalProduction> lista) {
+        List<Float> Values = new ArrayList<>();
+        for (AnimalProduction a : lista) {
+            Values.add(a.getAnno(2019 - nome + 4));
         }
         return Values;
-        }
+    }
 
+    public List<Map> getFilteredStats(String campoFiltro, String oper, Object rif)
+    {
+        Field[] fields = AnimalProduction.class.getDeclaredFields();
+        List<Map> lista = new ArrayList<> ();
+        int i=0;
+        for (Field f : fields) {
+            if (f.equals("anni") )
+            {lista.add(Statistiche.getNumStatistiche(f.getName(), getValues(2019-i,Filtri.FilteredValues(getValues(Integer.parseInt(campoFiltro),record), oper, rif))));
+                i++;}
+            else {lista.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(),Filtri.FilteredValues(getValues(campoFiltro,record), oper, rif))));}
+        }
+        return lista;
     }
 
 
+
+
+}
 
 
