@@ -61,7 +61,7 @@ public class Statistiche {
 
     }
 
-    public static Map<Object, Integer> contaElementiUnici(List lista) {
+    public static Map<Object, Integer> contaElementi(List <String> lista) {
 
         Map<Object, Integer> m = new HashMap<>();
 
@@ -115,7 +115,7 @@ public class Statistiche {
         m.put("field", nomeCampo);
 
         if (!lista.isEmpty()) {
-            m.put("elementiUnici", contaElementiUnici(lista));
+            m.put("contaElementi", contaElementi(lista));
 
             m.put("count", count(lista));
         }

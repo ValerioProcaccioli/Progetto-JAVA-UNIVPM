@@ -210,20 +210,19 @@ public class Download {
             Field[] fields = AnimalProduction.class.getDeclaredFields();
             int i=0;
             for (Field f : fields) {
-                if (f.equals("anni") )
+                if (f.getName().equals("anni") )
                 {list.add(Statistiche.getNumStatistiche(f.getName(), getValues(2019-i,record)));
                 i++;}
                 else {list.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(),record)));}
             }
-        } else {
-            if(Integer.parseInt(nomeCampo)>1000)
+        } else if(Integer.parseInt(nomeCampo)>1967 || Integer.parseInt(nomeCampo)<2020)
             {list.add(Statistiche.getNumStatistiche(nomeCampo, getValues(Integer.parseInt(nomeCampo), record)));}
             else{list.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, record)));}
-        }
+
         return list;
     }
 
-    public List getValues(String nome, List<AnimalProduction> lista) {
+    public List<String> getValues(String nome, List<AnimalProduction> lista) {
         List<String> Values = new ArrayList<>();
         for (AnimalProduction a : lista) {
             Values.add(a.getCampo(nome));
@@ -231,7 +230,7 @@ public class Download {
         return Values;
     }
 
-    public List getValues(Integer nome, List<AnimalProduction> lista) {
+    public List<Float> getValues(Integer nome, List<AnimalProduction> lista) {
         List<Float> Values = new ArrayList<>();
         for (AnimalProduction a : lista) {
             Values.add(a.getAnno(2019 - nome + 4));
@@ -239,23 +238,49 @@ public class Download {
         return Values;
     }
 
-    public List<Map> getFilteredStats(String campoFiltro, String oper, Object rif)
-    {
-        Field[] fields = AnimalProduction.class.getDeclaredFields();
-        List<Map> lista = new ArrayList<> ();
-        int i=0;
-        for (Field f : fields) {
-            if (f.equals("anni") )
-            {lista.add(Statistiche.getNumStatistiche(f.getName(), getValues(2019-i,Filtri.FilteredValues(getValues(Integer.parseInt(campoFiltro),record), oper, rif))));
-                i++;}
-            else {lista.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(),Filtri.FilteredValues(getValues(campoFiltro,record), oper, rif))));}
+    
+    public List<Map> getFilteredStats(String campoFiltro, String oper, Object rif, String nomeCampo) {
+        List<Map> lista = new ArrayList<>();
+        if (nomeCampo.equals("")) {
+            Field[] fields = AnimalProduction.class.getDeclaredFields();
+            int i = 0;
+            for (Field f : fields) {
+                if (f.getName().equals("anni")) {
+                    lista.add(Statistiche.getNumStatistiche(f.getName(), getValues(2019 - i, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
+                    i++;
+                } else {
+                    lista.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
+                }
+            }
+        } else if (nomeCampo.equals("anni")) {
+            lista.add(Statistiche.getNumStatistiche(nomeCampo, getValues(Integer.parseInt(nomeCampo), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
+        } else {
+
+            lista.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
         }
-        return lista;
+        return lista ;
     }
 
 
+      public List<Map> getFilteredStats(int campoFiltro, String oper, Object rif, String nomeCampo) {
+          List<Map> lista = new ArrayList<>();
+          if(nomeCampo.equals("")) {
+          Field[] fields = AnimalProduction.class.getDeclaredFields();
+          int i = 0;
+          for (Field f : fields) {
+              if (f.getName().equals("anni")) {
+                  lista.add(Statistiche.getNumStatistiche(f.getName(), getValues(2019 - i, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
+                  i++;
+              } else {
+                  lista.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
+              }
+          }
+           } else if (nomeCampo.equals("anni")) {
+               lista.add(Statistiche.getNumStatistiche(nomeCampo, getValues(Integer.parseInt(nomeCampo), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
+           } else {
 
-
-}
-
-
+               lista.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
+           }
+          return lista;
+      }
+    }
