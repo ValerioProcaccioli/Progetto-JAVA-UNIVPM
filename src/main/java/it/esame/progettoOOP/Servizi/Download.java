@@ -128,7 +128,7 @@ public class Download {
             for (Field f : fields) {
                 Map<String, String> map = new HashMap<>();
                 map.put("Alias", f.getName());
-                map.put("SourceField", splittedline[i]);
+                map.put("SourceField", splittedline[i]);               //toscanelli decide di fare i metadati dentro il parsing ;-)
                 map.put("Type", f.getType().getSimpleName());
                 Lista.add(map);
                 i++;
