@@ -16,9 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URI;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -32,7 +30,7 @@ import java.util.Map;
  * Compito di questa classe è di caricare il dataset e svolgere il parsing del file .tsv
  * Un file tsv è una tabella con delimiter "\t" o ","
  */
-
+ @Service
 public class Download {
 
     //public final static int intervallo = 51;
@@ -40,7 +38,6 @@ public class Download {
     private final static String TAB_DELIMITER = "\t";  //separatore TSV
     private static List<Map> Lista = new ArrayList();  //Lista di stringhe dedicata per i Metadata
     private static List<String> time = new ArrayList<>(); //Lista di stringhe per il controllo del campo record
-
     /**
      * Costruttore della classe Download
      *
@@ -100,13 +97,9 @@ public class Download {
         }
         //Metadata(fileTSV);
         Parsing(fileTSV);
+      //  System.out.println(record);
     }
 
-    private static void downloadTSV(String url, String NomeFile) throws Exception {
-        try (InputStream in = URI.create(url).toURL().openStream()) {
-            Files.copy(in, Paths.get(NomeFile));
-        }
-    }
 
 
     /**
@@ -138,12 +131,16 @@ public class Download {
             while ((linea = bfrd.readLine()) != null) {
                 linea = linea.replace(",", TAB_DELIMITER);
                 linea = linea.replace(":", "0");
+                linea = linea.replace("p", "");
+                linea = linea.replace("d", "");
+                linea = linea.replace("e", "");
                 splittedline = linea.trim().split(TAB_DELIMITER);
                 String animals = splittedline[0].trim();
                 String month = splittedline[1].trim();
                 String unit = splittedline[2].trim();
                 String geo = splittedline[3].trim();
                 List<Float> anni = new ArrayList<>();
+                i=0;
                 while (i + 4 < splittedline.length) {
                     anni.add(Float.parseFloat(splittedline[4 + i].trim()));
                     i++;
@@ -151,14 +148,18 @@ public class Download {
 
                 AnimalProduction parsedObj = new AnimalProduction(animals, month, unit, geo, anni);
                 record.add(parsedObj);
+
             }
 
-        } catch (
-                IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
+
+
+
+
 
     /**
      * Metodo che restituisce record
@@ -202,26 +203,37 @@ public class Download {
     /**
      * Metodo che restituisce la lista con i valori di un certo campo dei record
      *
-     * @return lista con i valori del campo
+     * @param nomeCampo parametro statistica
+     * @return list con i valori del campo
      */
     public List<Map> getStats(String nomeCampo) {
         List<Map> list = new ArrayList<>();
         if (nomeCampo.equals("")) {
             Field[] fields = AnimalProduction.class.getDeclaredFields();
-            int i=0;
             for (Field f : fields) {
                 if (f.getName().equals("anni") )
-                {list.add(Statistiche.getNumStatistiche(f.getName(), getValues(2019-i,record)));
-                i++;}
+                {for(int i=0; i<51; i++)
+                    list.add(Statistiche.getNumStatistiche(2019-i, getValues(2019-i,record))); }
                 else {list.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(),record)));}
             }
         } else if(Integer.parseInt(nomeCampo)>1967 || Integer.parseInt(nomeCampo)<2020)
-            {list.add(Statistiche.getNumStatistiche(nomeCampo, getValues(Integer.parseInt(nomeCampo), record)));}
+            {list.add(Statistiche.getNumStatistiche(Integer.parseInt(nomeCampo), getValues(Integer.parseInt(nomeCampo), record)));}
             else{list.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, record)));}
 
         return list;
     }
 
+    /**
+
+     * Metodo che estrae dalla lista di oggetti la lista dei valori relativi ad un singolo campo del dataset
+
+     *
+
+     * @param nome campo del dataset del quale estrarre i valori(eventuale anno se si vuole contributo)
+
+     * @return Values dei valori del campo richiesto
+
+     */
     public List<String> getValues(String nome, List<AnimalProduction> lista) {
         List<String> Values = new ArrayList<>();
         for (AnimalProduction a : lista) {
@@ -230,10 +242,24 @@ public class Download {
         return Values;
     }
 
+    /**
+
+     * Metodo che estrae dalla lista di oggetti la lista dei valori relativi ad un singolo campo del dataset
+
+     *
+
+     * @param nome campo del dataset del quale estrarre i valori(eventuale anno se si vuole contributo)
+
+     * @return Values dei valori del campo richiesto
+
+     */
     public List<Float> getValues(Integer nome, List<AnimalProduction> lista) {
         List<Float> Values = new ArrayList<>();
         for (AnimalProduction a : lista) {
-            Values.add(a.getAnno(2019 - nome + 4));
+            if(nome<2017 && Values.size()==50)
+            {return Values;}
+            else{
+            Values.add(a.getAnni().get(2019 - nome));}
         }
         return Values;
     }
@@ -243,17 +269,17 @@ public class Download {
         List<Map> lista = new ArrayList<>();
         if (nomeCampo.equals("")) {
             Field[] fields = AnimalProduction.class.getDeclaredFields();
-            int i = 0;
             for (Field f : fields) {
                 if (f.getName().equals("anni")) {
-                    lista.add(Statistiche.getNumStatistiche(f.getName(), getValues(2019 - i, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
-                    i++;
+                    for(int i=0;i<51;i++)
+                    lista.add(Statistiche.getNumStatistiche(2019-i, getValues(2019 - i, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
+
                 } else {
                     lista.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
                 }
             }
         } else if (nomeCampo.equals("anni")) {
-            lista.add(Statistiche.getNumStatistiche(nomeCampo, getValues(Integer.parseInt(nomeCampo), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
+            lista.add(Statistiche.getNumStatistiche(Integer.parseInt(nomeCampo), getValues(Integer.parseInt(nomeCampo), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
         } else {
 
             lista.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
@@ -266,21 +292,55 @@ public class Download {
           List<Map> lista = new ArrayList<>();
           if(nomeCampo.equals("")) {
           Field[] fields = AnimalProduction.class.getDeclaredFields();
-          int i = 0;
           for (Field f : fields) {
               if (f.getName().equals("anni")) {
-                  lista.add(Statistiche.getNumStatistiche(f.getName(), getValues(2019 - i, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
-                  i++;
+                  for(int i=0;i<51;i++)
+                  lista.add(Statistiche.getNumStatistiche(2019-i, getValues(2019 - i, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
               } else {
                   lista.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
               }
           }
            } else if (nomeCampo.equals("anni")) {
-               lista.add(Statistiche.getNumStatistiche(nomeCampo, getValues(Integer.parseInt(nomeCampo), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
+               lista.add(Statistiche.getNumStatistiche(Integer.parseInt(nomeCampo), getValues(Integer.parseInt(nomeCampo), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
            } else {
 
                lista.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
            }
           return lista;
       }
+
+    private static void downloadTSV(String url, String fileName) throws Exception {
+
+        HttpURLConnection openConnection = (HttpURLConnection) new URL(url).openConnection();
+
+        openConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
+
+        InputStream in = openConnection.getInputStream();
+
+
+        try {
+
+            if(openConnection.getResponseCode() >= 300 && openConnection.getResponseCode() < 400) {
+
+                downloadTSV(openConnection.getHeaderField("Location"),fileName);        //Richiama il metodo downloadTSV
+
+                in.close();
+
+                openConnection.disconnect();
+
+                return;
+
+            }
+
+            Files.copy(in, Paths.get(fileName));
+
+            System.out.println("File size " + Files.size(Paths.get(fileName)));
+
+        } finally {
+
+            in.close();
+
+        }
+
+    }
     }

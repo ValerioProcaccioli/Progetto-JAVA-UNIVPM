@@ -77,7 +77,7 @@ public class Statistiche {
 
     }
 
-    public static Map<String, Object> getNumStatistiche(String nomeCampo, List<Float> lista) {
+    public static Map<String, Object> getNumStatistiche(Integer nomeCampo, List<Float> lista) {
 
         Map<String, Object> m = new HashMap<>();
 

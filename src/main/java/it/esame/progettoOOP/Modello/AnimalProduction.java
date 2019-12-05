@@ -2,7 +2,6 @@ package it.esame.progettoOOP.Modello;
 
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.List;
 
 public class AnimalProduction implements Serializable {
@@ -24,7 +23,7 @@ public class AnimalProduction implements Serializable {
     }
 
 
-   /* public String getAnimals() {
+   public String getAnimals() {
 
         return animals;
 
@@ -50,7 +49,7 @@ public class AnimalProduction implements Serializable {
         return geo;
 
     }
-*/
+
    public String getCampo(String nomeCampo){
 
       switch(nomeCampo)
@@ -68,7 +67,7 @@ public class AnimalProduction implements Serializable {
         return anni;
     }
 
-    public Float getAnno(Integer pos){return anni.get(pos);}
+
 
 
     public String toString() {

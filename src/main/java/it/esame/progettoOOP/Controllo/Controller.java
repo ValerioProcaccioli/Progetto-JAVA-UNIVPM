@@ -54,9 +54,16 @@ public class Controller {
      * @param i indice della lista che si vuole ottenere
      * @return "record" ovvero la lista con gli oggetti AnimalProduction
      */
+
+
     @GetMapping("/Record/{i}")
     public AnimalProduction getAnimalProduction(@PathVariable int i) {
         return service.getRecord(i);
+    }
+
+    @GetMapping("/Record")
+    public List<AnimalProduction> record(){
+        return service.getRecord();
     }
 
     /**
