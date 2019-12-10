@@ -8,49 +8,55 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Filtri {
-public static boolean Controlla(Object value, String oper, Object rif)
+
+
+public static boolean Controlla(Object value, String oper, String rif)
 {
-    /*if (value instanceof Number)
-    {if(rif instanceof Number)
-    {
-        switch(oper)
-        {
-            case "$not":
 
-                return (float)value != (float)rif;
+       if (value instanceof Number) {
+           float val = ((Number) value).floatValue();
+           try {
+               float rifer = Float.parseFloat(rif);
+               switch (oper) {
+                   case "$not":
+                       return val != rifer;
+                   case "$eq":
+                       return val == rifer;
+                   case "$gte":
+                       return val >= rifer;
+                   case "$lte":
+                       return val <= rifer;
+                   default:
+                       String errore = "l'operatore" + oper + "non è presente o è inadatto al confronto tra" + val + "e" + rifer;
+                       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errore);
+               }
+           } catch (NumberFormatException e) {
+               String errore = "Non si può confrontare un numero con una stringa";
+               throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errore);
+           }
+       } else if (value instanceof String || value instanceof Character) {// caso in cui il valore da controllare sia una stringa o un carattere (per freq)
+           if (value instanceof Character)
+               value = String.valueOf(value); //nel caso di carattere, lo riporto a stringa
+           String val = ((String) value); // conversione
 
-            case "$eq":
+               switch (oper) { //selezione operatore
+                   case "$eq":
+                       return val.equals(rif);
+                   case "$not":
+                       return !val.equals(rif);
+                   default:
 
-                return (float)value == (float)rif;
+                       String erroreOper = "L'operatore:'" + oper + "' non è presente o risulta inadatto per gli operandi: '" + value + "' , '" + rif + "'";
+                       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, erroreOper);
+               }
 
-            case "$gt":
+       }else
+           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Formato del valore non riconosciuto");
 
-                return (float)value > (float)rif;
-
-            case "$gte":
-
-                return (float)value >= (float)rif;
-
-            case "$lt":
-
-                return (float)value < (float)rif;
-
-            case "$lte":
-
-                return (float)value <= (float)rif;
-
-            default: String errore= "l'operatore" + oper + "non è presente o è inadatto al confronto tra"+ value +"e"+ rif;
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errore);
-        }
-
-    }
-    }**/
-    return true;
 }
-    public static List<AnimalProduction> FilteredValues (List values, String operatore, Object rif)
+    public static List<AnimalProduction> FilteredValues (List values, String operatore, String rif)
     {
         List<AnimalProduction> filtrati = new ArrayList<>();
-
         for (int i = 0; i < values.size(); i++) {
 
             if (Controlla(values.get(i), operatore, rif)) // eseguiamo il controllo per ogni elemento della lista: se soddisfatto aggiungo l'indice alla lista
@@ -59,6 +65,22 @@ public static boolean Controlla(Object value, String oper, Object rif)
 
         }
 
+        return filtrati;
+    }
+    public static List<AnimalProduction> FilteredEndor(List values, List values2, String operatore, String[] rif )
+    {
+        List<AnimalProduction> filtrati = new ArrayList<>();
+        if (operatore.equals("$and"))
+        {
+            for (int i=0;i<values.size() && i<values2.size();i++)
+            {if (Controlla(values.get(i), "$eq", rif[0]) && Controlla(values2.get(i), "$eq", rif[1]))
+                filtrati.add(Download.getRecord(i));
+            }
+        }
+        else { for (int i=0;i<values.size() || i<values2.size();i++)
+        {if (Controlla(values.get(i), "$eq", rif[0]) && Controlla(values2.get(i), "$eq", rif[1]))
+            filtrati.add(Download.getRecord(i)); }
+        }
         return filtrati;
     }
 }

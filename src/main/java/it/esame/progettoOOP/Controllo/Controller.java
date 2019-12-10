@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.BasicJsonParser;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.*;
 
 @RestController
 public class Controller {
@@ -84,10 +86,12 @@ public class Controller {
      * @param body body della richiesta POST contenente un filtro
      * @return mappa contenente i parametri del filtro: nomeCampo, operatore e valore di riferimento
      */
-    private static Map<String, Object> ottieniFiltro(String body) {
+  /*  private static Map<String, Object> ottieniFiltro(String body) {
         Map<String, Object> bodyParsato = new BasicJsonParser().parseMap(body); //il filtro ha la sintassi di un json
         Object nomeCampo = bodyParsato.keySet().toArray(new String[0])[0];
         Object valore = bodyParsato.get(nomeCampo);
+
+
         Object rif;
         String oper;
         if (valore instanceof Map) {
@@ -103,6 +107,17 @@ public class Controller {
         filtro.put("campo", nomeCampo);
         filtro.put("rif", rif);
         return filtro;
+    }*/
+    private static String ottieniFiltro(String body){
+        String linea=body;
+        List<AnimalProduction> list= new ArrayList<>();
+        linea=linea.replace("{","");
+        linea=linea.replace("\"","");
+        linea=linea.replace("}","");
+        linea=linea.replace(",",":");
+        linea=linea.replace("[","");
+        linea=linea.replace("]","");
+        return linea;
     }
     /**
      * Metodo che gestisce una richiesta POST alla rotta "/data", resituendo la lista dei record che soddisfano il filtro
@@ -111,16 +126,42 @@ public class Controller {
      * @return lista di oggetti che soddisfano il filtro
      */
     @PostMapping("/DatiFiltrati")
-    public List getDatiFiltrati(@RequestBody String body) {
-        Map<String, Object> filter = ottieniFiltro(body); //creo mappa per contenere il filtro parsato
+    public List<AnimalProduction> getDatiFiltrati(@RequestBody String body) {
+        //Map<String, Object> filter = ottieniFiltro(body); //creo mappa per contenere il filtro parsato
         //estraggo i parametri del filtro
-        Object nomeCampo = filter.get("campo");
-        String oper = (String) filter.get("oper");
-        Object rif = filter.get("rif");
-        if (nomeCampo instanceof Number) {
-            return Filtri.FilteredValues(service.getValues((int) nomeCampo, service.getRecord()), oper, rif); //chiamata al metodo getDatiFiltrati del package service che restituisce la lista di dati filtrati
+        String linea=ottieniFiltro(body);
+        String line[]=linea.trim().split(":");
+        String nomeCampo,oper,rif;
+        if(linea.contains("and") || linea.contains("or")) {
+
+            oper = line[0].trim();
+            String[] nome = {line[1].trim(), line[3].trim()};
+            String[] rifer = {line[2].trim(), line[4].trim()};
+            try {
+                return Filtri.FilteredEndor(service.getValues(Integer.parseInt(nome[0]), service.getRecord()), service.getValues(Integer.parseInt(nome[1]), service.getRecord()), oper, rifer);
+            } catch (NumberFormatException e) {
+                try {
+                    return Filtri.FilteredEndor(service.getValues(nome[0], service.getRecord()), service.getValues(Integer.parseInt(nome[1]), service.getRecord()), oper, rifer);
+                } catch (NumberFormatException e1) {
+                    try {
+                        return Filtri.FilteredEndor(service.getValues(Integer.parseInt(nome[0]), service.getRecord()), service.getValues(nome[1], service.getRecord()), oper, rifer);
+                    } catch (NumberFormatException e2) {
+                        return Filtri.FilteredEndor(service.getValues(nome[0], service.getRecord()), service.getValues(nome[1], service.getRecord()), oper, rifer);
+                    }
+                }
+            }
         }
-        return Filtri.FilteredValues(service.getValues( nomeCampo.toString(), service.getRecord()), oper, rif);
+       // Object nomeCampo = filter.get("campo");
+        //String oper = (String) filter.get("oper");
+        //Object rif = filter.get("rif");
+       else{ nomeCampo=line[0].trim();
+        oper=line[1].trim();
+        rif=line[2].trim();
+        try {Integer.parseInt(nomeCampo);
+            return Filtri.FilteredValues(service.getValues(Integer.parseInt(nomeCampo), service.getRecord()), oper, rif); //chiamata al metodo getDatiFiltrati del package service che restituisce la lista di dati filtrati
+        }
+        catch ( NumberFormatException e){
+        return Filtri.FilteredValues(service.getValues( nomeCampo, service.getRecord()), oper, rif);}}
     }
     /**
      * Metodo POST che su richiesta dell'utente restituisce le statistiche filtrate relative ad un campo(opzionale) o su tutti i campi, considerando i record che soddisfano il filtro
@@ -129,17 +170,25 @@ public class Controller {
      * @param body il JSON passato dall'utente con i relativi campo, operatore e riferimento
      * @return restituice le statistiche filtrate di un campo inserito dall'utente
      */
-    @PostMapping("/StatisticheFiltrate")
-    public List<Map> getStatisticheFiltrate(@RequestParam(value = "Field", required = false, defaultValue = "") String nomeCampo, @RequestBody String body){
-        Map<String, Object> filter = ottieniFiltro(body);                               //Effettua il parsing del body
-        Object FilteredField = filter.get("campo");
-        String oper = (String) filter.get("oper");
-        Object rif = filter.get("rif");
-        if (FilteredField instanceof Number) {
-            return service.getFilteredStats((int)FilteredField, oper, rif, nomeCampo);  //chiamata al metodo getDatiFiltrati del package service che restituisce la lista di dati filtrati
-    }
-
-        return service.getFilteredStats(FilteredField.toString(), oper, rif, nomeCampo);
+   @PostMapping("/StatisticheFiltrate")
+  public List<Map> getStatisticheFiltrate(@RequestParam(value = "Field", required = false, defaultValue = "") String nomeCampo, @RequestBody String body){
+                                    //Effettua il parsing del body
+       String linea=ottieniFiltro(body);
+       String line[]=linea.trim().split(":");
+       if(linea.contains("and") || linea.contains("or"))
+       {
+        return  service.getEndorStats(nomeCampo,getDatiFiltrati(body));
+       }
+       else{
+           String FilteredField,oper,rif;
+           FilteredField=line[0];
+           oper=line[1];
+           rif=line[2];
+        try {Integer.parseInt(FilteredField);
+            return service.getFilteredStats(Integer.parseInt(FilteredField), oper, rif, nomeCampo);  //chiamata al metodo getDatiFiltrati del package service che restituisce la lista di dati filtrati
+    }catch (NumberFormatException e)
+        {return service.getFilteredStats(FilteredField, oper, rif, nomeCampo);}
+       }
     }
 
 

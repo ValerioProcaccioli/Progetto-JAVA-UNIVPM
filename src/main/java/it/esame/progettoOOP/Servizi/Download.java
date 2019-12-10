@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * Compito di questa classe è di caricare il dataset e svolgere il parsing del file .tsv
  * Un file tsv è una tabella con delimiter "\t" o ","
@@ -216,9 +217,10 @@ public class Download {
                     list.add(Statistiche.getNumStatistiche(2019-i, getValues(2019-i,record))); }
                 else {list.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(),record)));}
             }
-        } else if(Integer.parseInt(nomeCampo)>1967 || Integer.parseInt(nomeCampo)<2020)
-            {list.add(Statistiche.getNumStatistiche(Integer.parseInt(nomeCampo), getValues(Integer.parseInt(nomeCampo), record)));}
-            else{list.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, record)));}
+        } else try{Integer.parseInt(nomeCampo);
+            list.add(Statistiche.getNumStatistiche(Integer.parseInt(nomeCampo), getValues(Integer.parseInt(nomeCampo), record)));}
+            catch ( NumberFormatException e)
+            {list.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, record)));}
 
         return list;
     }
@@ -264,8 +266,32 @@ public class Download {
         return Values;
     }
 
-    
-    public List<Map> getFilteredStats(String campoFiltro, String oper, Object rif, String nomeCampo) {
+    public List<Map> getEndorStats(String nomeCampo,List <AnimalProduction> list) {
+        List<Map> lista = new ArrayList<>();
+        if (nomeCampo.equals("")){
+            Field[] fields = AnimalProduction.class.getDeclaredFields();
+            for (Field f : fields) {
+                if (f.getName().equals("anni")) {
+                    for (int i = 0; i < 51; i++) {
+                        lista.add(Statistiche.getNumStatistiche(2019 - i, getValues(2019 - i, list)));
+                    }
+                }else{
+                        lista.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(),list)));
+                    }
+                }
+        }
+        else {
+            try {
+                Integer.parseInt(nomeCampo);
+                lista.add(Statistiche.getNumStatistiche(Integer.parseInt(nomeCampo), getValues(Integer.parseInt(nomeCampo), list)));
+            } catch (NumberFormatException e) {
+                lista.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, list)));
+            }
+        }
+        return lista;
+    }
+
+    public List<Map> getFilteredStats(String campoFiltro, String oper, String rif, String nomeCampo) {
         List<Map> lista = new ArrayList<>();
         if (nomeCampo.equals("")) {
             Field[] fields = AnimalProduction.class.getDeclaredFields();
@@ -278,17 +304,16 @@ public class Download {
                     lista.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
                 }
             }
-        } else if (nomeCampo.equals("anni")) {
-            lista.add(Statistiche.getNumStatistiche(Integer.parseInt(nomeCampo), getValues(Integer.parseInt(nomeCampo), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
-        } else {
-
-            lista.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
+        } else try{Integer.parseInt(nomeCampo);
+            lista.add(Statistiche.getNumStatistiche(Integer.parseInt(nomeCampo), getValues(Integer.parseInt(nomeCampo), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));}
+            catch ( NumberFormatException e)
+            {lista.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif)))); }
+            return lista;
         }
-        return lista ;
-    }
 
 
-      public List<Map> getFilteredStats(int campoFiltro, String oper, Object rif, String nomeCampo) {
+
+      public List<Map> getFilteredStats(int campoFiltro, String oper, String rif, String nomeCampo) {
           List<Map> lista = new ArrayList<>();
           if(nomeCampo.equals("")) {
           Field[] fields = AnimalProduction.class.getDeclaredFields();
@@ -300,12 +325,9 @@ public class Download {
                   lista.add(Statistiche.getStatistiche(f.getName(), getValues(f.getName(), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
               }
           }
-           } else if (nomeCampo.equals("anni")) {
-               lista.add(Statistiche.getNumStatistiche(Integer.parseInt(nomeCampo), getValues(Integer.parseInt(nomeCampo), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
-           } else {
-
-               lista.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));
-           }
+           } else try {Integer.parseInt(nomeCampo);
+               lista.add(Statistiche.getNumStatistiche(Integer.parseInt(nomeCampo), getValues(Integer.parseInt(nomeCampo), Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif)))); }
+               catch(NumberFormatException e) {lista.add(Statistiche.getStatistiche(nomeCampo, getValues(nomeCampo, Filtri.FilteredValues(getValues(campoFiltro, record), oper, rif))));}
           return lista;
       }
 
