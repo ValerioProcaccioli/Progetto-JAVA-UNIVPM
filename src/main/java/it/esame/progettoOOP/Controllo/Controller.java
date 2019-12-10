@@ -3,17 +3,13 @@ package it.esame.progettoOOP.Controllo;
 import it.esame.progettoOOP.Modello.AnimalProduction;
 import it.esame.progettoOOP.Servizi.Download;
 import it.esame.progettoOOP.Servizi.Filtri;
-import it.esame.progettoOOP.Servizi.Statistiche;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.BasicJsonParser;
 import org.springframework.web.bind.annotation.*;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.io.*;
 
 @RestController
 public class Controller {
@@ -126,7 +122,7 @@ public class Controller {
      * @return lista di oggetti che soddisfano il filtro
      */
     @PostMapping("/DatiFiltrati")
-    public List<AnimalProduction> getDatiFiltrati(@RequestBody String body) {
+    public List<AnimalProduction> datiFiltrati(@RequestBody String body) {
         //Map<String, Object> filter = ottieniFiltro(body); //creo mappa per contenere il filtro parsato
         //estraggo i parametri del filtro
         String linea=ottieniFiltro(body);
@@ -171,13 +167,14 @@ public class Controller {
      * @return restituice le statistiche filtrate di un campo inserito dall'utente
      */
    @PostMapping("/StatisticheFiltrate")
-  public List<Map> getStatisticheFiltrate(@RequestParam(value = "Field", required = false, defaultValue = "") String nomeCampo, @RequestBody String body){
+  public List<Map> StatisticheFiltrate(@RequestParam(value = "Field", required = false, defaultValue = "") String nomeCampo, @RequestBody String body){
                                     //Effettua il parsing del body
        String linea=ottieniFiltro(body);
        String line[]=linea.trim().split(":");
        if(linea.contains("and") || linea.contains("or"))
+
        {
-        return  service.getEndorStats(nomeCampo,getDatiFiltrati(body));
+        return  service.EndorStats(nomeCampo, datiFiltrati(body));
        }
        else{
            String FilteredField,oper,rif;

@@ -266,7 +266,7 @@ public class Download {
         return Values;
     }
 
-    public List<Map> getEndorStats(String nomeCampo,List <AnimalProduction> list) {
+    public List<Map> EndorStats(String nomeCampo, List <AnimalProduction> list) {
         List<Map> lista = new ArrayList<>();
         if (nomeCampo.equals("")){
             Field[] fields = AnimalProduction.class.getDeclaredFields();
