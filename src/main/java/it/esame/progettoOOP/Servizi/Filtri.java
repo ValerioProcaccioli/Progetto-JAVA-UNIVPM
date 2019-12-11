@@ -9,15 +9,15 @@ import java.util.List;
 
 public class Filtri {
 
-
+/*funzione che stabilisce se il campo esaminato rispetta o meno il filtro*/
 public static boolean Controlla(Object value, String oper, String rif)
 {
 
        if (value instanceof Number) {
-           float val = ((Number) value).floatValue();
+           float val = ((Number) value).floatValue();//a seconda del tipo del valore da confrontare c'è un differente elenco di operatori disponibili
            try {
                float rifer = Float.parseFloat(rif);
-               switch (oper) {
+               switch (oper) {//selezione operatore
                    case "$not":
                        return val != rifer;
                    case "$eq":
@@ -54,7 +54,11 @@ public static boolean Controlla(Object value, String oper, String rif)
            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Formato del valore non riconosciuto");
 
 }
-    public static List<AnimalProduction> FilteredValues (List values, String operatore, String rif)
+
+/*questo metodo scorre tutti i valori della lista associata al campo da filtrare, se il valore corrente rispetta
+ la funzione booleana controlla, si chiama la riga del record dove si trova il valore corrente
+ e lo si aggiunge alla lista filtrata*/
+    public static List<AnimalProduction> FilteredValues(List values, String operatore, String rif)
     {
         List<AnimalProduction> filtrati = new ArrayList<>();
         for (int i = 0; i < values.size(); i++) {
@@ -67,7 +71,12 @@ public static boolean Controlla(Object value, String oper, String rif)
 
         return filtrati;
     }
-    public static List<AnimalProduction> FilteredEndor(List values, List values2, String operatore, String[] rif )
+
+    /*questo metodo filtra il dataset usando "$and" o "$or", per farlo riceve in ingresso due liste ed effettua per entrambe
+    * un controllo per ognuno degli elementi che le compone, nel caso dell'and per aggiungere alla lista degli elementi filtrati
+    * la riga del dataset in cui si trovano i campi esaminati, entrambi devono soddisfare il filtro $eq rispetto al
+    * relativo riferimento. Mentre per soddisfare l'or è sufficiente che solo uno degli elementi delle due liste soddisfi $eq*/
+    public static List<AnimalProduction> FilteredAndOr(List values, List values2, String operatore, String[] rif )
     {
         List<AnimalProduction> filtrati = new ArrayList<>();
         if (operatore.equals("$and"))

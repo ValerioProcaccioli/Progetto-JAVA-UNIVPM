@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//Vengono chiamate le funzioni per i valori numerici: somma, conteggio elementi lista (funzione che vale anche per le stringhe),  media, valore minimo, valore massimo, deviazione standard
 public class Statistiche {
     public static float sum (List<Float> lista )
     {
@@ -61,6 +62,8 @@ public class Statistiche {
 
     }
 
+    /*funzione valida solo per le stringhe che restituisce una mappa contentente
+     tutte le stringhe differenti di un determinato campo e il numero delle volte che compaiono*/
     public static Map<Object, Integer> contaElementi(List <String> lista) {
 
         Map<Object, Integer> m = new HashMap<>();
@@ -77,6 +80,7 @@ public class Statistiche {
 
     }
 
+    /*funzione che esegue tutte le funzioni sui valori numerici e restituisce una mappa coi rispettivi risultati*/
     public static Map<String, Object> getNumStatistiche(Integer nomeCampo, List<Float> lista) {
 
         Map<String, Object> m = new HashMap<>();
@@ -108,6 +112,7 @@ public class Statistiche {
 
     }
 
+    //funzione che esegue tutte le funzioni sui valori stringa e restituisce una mappa coi rispettivi risultati
     public static   Map<String, Object> getStatistiche(String nomeCampo, List<String> lista) {
 
         Map<String, Object> m = new HashMap<>();
