@@ -111,5 +111,6 @@ All'interno della repository, nella cartella `UML`, si possono trovare i diagram
 ## AUTORI
 
 *Nicola Carletti - Carlito9*
+
 *Valerio Procaccioli - ValerioProcaccioli*
 
