@@ -25,7 +25,7 @@ import java.util.Map;
  * Compito di questa classe è di caricare il dataset e svolgere il parsing del file .tsv
  * Un file tsv è una tabella con delimiter "\t" o ","
  */
- @Service
+
  public class Download {
     public Download() throws IOException {
         HttpURLConnection open= Utilities.Connect("https://data.europa.eu/euodp/data/api/3/action/package_show?id=5QxHU0Y7cs987D7T9AA");

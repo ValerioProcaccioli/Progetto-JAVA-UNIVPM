@@ -13,5 +13,11 @@ public class Utilities {
         return open;
     }
 
+    public static Object trasforma(String numero)
+    {if(numero.charAt(0)==':')
+    {return "nnn";}
+    else
+    return numero.replace(numero.charAt(numero.length()-1),'0');}
+
 
 }
