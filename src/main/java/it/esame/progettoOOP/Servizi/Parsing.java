@@ -37,6 +37,7 @@ public class Parsing {
     }
 
     public List<Modellante> getRecord() {
-        return record;
+       return record;
     }
+
 }
