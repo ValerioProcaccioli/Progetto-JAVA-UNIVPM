@@ -4,11 +4,15 @@ package it.esame.progettoOOP.Controllo;
 import it.esame.progettoOOP.Modello.Modellante;
 import it.esame.progettoOOP.Servizi.*;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 
 @RestController
@@ -80,5 +84,12 @@ public class Controller {
         stats=new StrStatistics(ottieniColonna(nomeCampo));
     }
     return nomeCampo+" : "+stats.toString();
+}
+
+@PostMapping ("/DatiFiltrati")
+    public List<Modellante> datiFiltrati(@RequestBody Map<String,Map<String,Object>[]>body) {
+    Filter ogg=new Filter(body);
+
+    return rec;
 }
 }
