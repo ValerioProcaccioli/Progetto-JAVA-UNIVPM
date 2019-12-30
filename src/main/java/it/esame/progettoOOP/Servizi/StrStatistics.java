@@ -1,19 +1,17 @@
 package it.esame.progettoOOP.Servizi;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class StrStatistics extends Statistics{
-    private String contElem;
+    private Map<String,Integer> contElem;
         public StrStatistics(List<String> list) {
             super(list);
-            Set<String> elem = new HashSet<>(list);
-            contElem=Utilities.contaElem(list, elem);
+            contElem=Utilities.contaElem(list);
         }
 
         @Override
-        public String toString() {
-            return ("{{Conteggio elementi con stesso nome: ["+contElem+"]}, { conteggio elementi lista: "+count+" }}");
+        public Map<String, Object> retResult() {
+            mappa.put("conteggio elementi con stesso nome: ", contElem);
+            return mappa;
         }
     }

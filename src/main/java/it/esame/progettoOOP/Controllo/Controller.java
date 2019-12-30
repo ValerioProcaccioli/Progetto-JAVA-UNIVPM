@@ -1,23 +1,21 @@
 package it.esame.progettoOOP.Controllo;
 
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import it.esame.progettoOOP.Modello.Modellante;
 import it.esame.progettoOOP.Servizi.*;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.BasicJsonParser;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.*;
 
 @RestController
 public class Controller {
-    private Parsing p;
     private List<Modellante> rec;
 
     /**
@@ -28,37 +26,23 @@ public class Controller {
 
     @Autowired
     public Controller(Parsing p){
-        this.p = p;
         rec=p.getRecord();
     }
 
-    public List ottieniColonna(String nome) {
-        List<String> colonnas = new ArrayList<>();
-        List<Float> colonnaf= new ArrayList<>();
-        Object val;
-        for (Modellante m : rec) {
-            val=m.getValori(nome);
-            if (!(val.equals("nnn"))) {
-                try{colonnaf.add(Float.parseFloat(val.toString()));}
-                catch (NumberFormatException e){colonnas.add(val.toString());}
-            }
-        }
-        if(!colonnaf.isEmpty())
-        {return colonnaf;}
-        else
-        {return colonnas;}
 
-    }
     @GetMapping("/Record")
     public List<Modellante> getRecord(){
-
         return rec;
     }
 
+    @GetMapping("/Record/{i}")
+    public Modellante getRecord(@PathVariable int i) {
+        return rec.get(i);
+    }
 
     @GetMapping("/Metadata")
-    public List<Map> getMetadata(){
-        List<Map> list=new ArrayList<>();
+    public List<Map<String,Object>> getMetadata(){
+        List<Map<String,Object>> list=new ArrayList<>();
         Set<Object> nomi = new HashSet<>();
         for (int i = 2019; i > 1968; i--)
             nomi.add(i);
@@ -75,21 +59,64 @@ public class Controller {
         return list;
     }
 
+    public  List ottieniColonna(String nome,List<Modellante> lista) {
+        List<String> colonnas = new ArrayList<>();
+        List<Float> colonnaf= new ArrayList<>();
+        Object val;
+        for (Modellante m : lista) {
+            val=m.getValori(nome);
+            if (!(val.equals("nnn"))) {
+                try{colonnaf.add(Float.parseFloat(val.toString()));}
+                catch (NumberFormatException e){colonnas.add(val.toString());}
+            }
+        }
+        if(!colonnaf.isEmpty())
+        {return colonnaf;}
+        else
+        {return colonnas;}
+
+    }
 @GetMapping ("/Statistiche")
-    public String getStats(@RequestParam(value = "Field", required = false, defaultValue = "") String nomeCampo) {
+    public Map getStats(@RequestParam(value = "Campo", required = false, defaultValue = "") String nomeCampo) {
         Statistics stats;
     try {Integer.parseInt(nomeCampo);
-        stats=new NumStatistics(ottieniColonna(nomeCampo));
+        stats=new NumStatistics(ottieniColonna(nomeCampo,rec));
     }catch (NumberFormatException e){
-        stats=new StrStatistics(ottieniColonna(nomeCampo));
+        stats=new StrStatistics(ottieniColonna(nomeCampo,rec));
     }
-    return nomeCampo+" : "+stats.toString();
+    return new BasicJsonParser().parseMap("{"+nomeCampo+" : "+stats.toString());
 }
+
+@ExceptionHandler (JsonMappingException.class)
+public String gestisciEccezioni(JsonMappingException e){return "Richiesta POST illeggibile. Consultare il readMe per chiarimenti.";}
 
 @PostMapping ("/DatiFiltrati")
-    public List<Modellante> datiFiltrati(@RequestBody Map<String,Map<String,Object>[]>body) {
-    Filter ogg=new Filter(body);
+    public List<Modellante> datiFiltrati(@RequestBody  Map<String,Map<String,Object>[]>body) {
+        return new Filter(body).Filtra(rec);
+}
 
+@PostMapping("/StatisticheFiltrate")
+   public Map<String,Object> FilteredStats(@RequestBody  Map<String,Map<String,Object>[]>body,@RequestParam(value = "Campo", required = false, defaultValue = "") String nomeCampo)
+{
+    Statistics stats;
+    try {Integer.parseInt(nomeCampo);
+        return new NumStatistics(ottieniColonna(nomeCampo,datiFiltrati(body))).retResult();
+    }catch (NumberFormatException e){
+        return new StrStatistics(ottieniColonna(nomeCampo,datiFiltrati(body))).retResult();
+
+    }
+
+}
+
+@DeleteMapping ("/RimuoviRecord")
+    public List<Modellante> deleteRecord(@RequestBody  Map<String,Map<String,Object>[]>body)
+{
+    for(Modellante m: datiFiltrati(body))
+    {
+        rec.removeIf(m1 -> m1.equals(m));
+    }
     return rec;
 }
+
+//@PostMapping ("/InserisciRecord")
 }

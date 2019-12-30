@@ -18,7 +18,10 @@ public class Modellante {
        modella.put("geo", valori[3]);
        for (int i = 2019; i > 1968; i--) {
            if (!(valori[2023-i].charAt(0) ==':'))
-             modella.put(i, Utilities.trasforma(valori[2023 - i]));
+           {
+             try{modella.put(i, Float.parseFloat(valori[2023 - i]));}
+             catch(NumberFormatException e){modella.put(i,Utilities.trasforma(valori[2023-i])); }
+           }
        }
    }
    public Object getValori(String nome)

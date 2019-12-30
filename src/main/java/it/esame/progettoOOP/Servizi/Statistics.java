@@ -1,17 +1,19 @@
 package it.esame.progettoOOP.Servizi;
 
-import java.util.HashSet;
+
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+
 
 public abstract class Statistics {
 
-    protected int count;
+    protected Map<String,Object> mappa=new HashMap<>();;
 
     public Statistics(List list) {
-        count = list.size();
+        mappa.put("conteggio elementi lista",list.size());
     }
 
-    public abstract String toString();
+    public abstract Map<String,Object> retResult();
 }
 

@@ -3,12 +3,9 @@ package it.esame.progettoOOP.Servizi;
 import it.esame.progettoOOP.Modello.Modellante;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Utilities {
     public static HttpURLConnection Connect(String url) throws IOException {
@@ -18,9 +15,8 @@ public class Utilities {
         return open;
     }
 
-    public static Object trasforma(String numero) {
-
-        return numero.replace(numero.charAt(numero.length() - 1), '0');
+    public static Float trasforma(String numero) {
+        return Float.parseFloat(numero.replace(numero.charAt(numero.length() - 1), '0'));
     }
 
     public static float min(List<Float> list)
@@ -54,18 +50,22 @@ public class Utilities {
 
     }
 
-    public static String contaElem(List<String> list, Set<String> elem )
+    public static Map<String,Integer> contaElem(List<String> list)
     {
-        int n=0;
-        String risultato="";
-        for(Object o: elem)
-        {
-            for(Object o1: list)
-            {
-                if(o1.equals(o))
-                {n++;}
+        int n;
+        Map<String,Integer> risultato= new HashMap<>();
+        for(String o: list)
+        {n=0;
+            if(!(risultato.containsKey(o))) {
+            System.out.println(o);
+            System.out.println("aaaaaaaaaaaaaaaaa");
+            for (String o1 : list) {
+                if (o.equals(o1)) {
+                    n++;
+                }
             }
-            risultato=risultato+"{"+o+" : "+n+"}";
+            risultato.put(o, n);
+        }
         }
         return risultato;
     }

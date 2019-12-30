@@ -1,22 +1,23 @@
 package it.esame.progettoOOP.Servizi;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NumStatistics extends Statistics {
-    private float avg, min, max, sum, devstd;
+
 
     public NumStatistics(List<Float> list) {
         super(list);
-        min = Utilities.min(list);
-        max = Utilities.max(list);
-        sum = Utilities.sum(list);
-        avg = sum / count;
-        devstd = Utilities.devStd(list, avg);
+        mappa.put("valore minimo",Utilities.min(list));
+        mappa.put("valore massimo",Utilities.max(list));
+        mappa.put("somma valori",Utilities.sum(list));
+        mappa.put("media valori",(float)mappa.get("somma valori") / (int)mappa.get("conteggio elementi lista"));
+        mappa.put("deviazione standard valori",Utilities.devStd(list, (float)mappa.get("media valori")));
     }
 
 @Override
-    public String toString() {
-        return ("{{ valore minimo: " + min + "}, { valore massimo: " + max +"}, { somma valori: " + sum + "}, { media valori: " + avg +
-                "}, { deviazione standard valori: " + devstd +"}, { conteggio elementi lista: "+count+ "}}");
+    public Map<String, Object> retResult() {
+        return mappa;
     }
 }
