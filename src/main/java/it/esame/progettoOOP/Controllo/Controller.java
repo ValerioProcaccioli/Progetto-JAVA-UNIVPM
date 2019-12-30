@@ -78,13 +78,10 @@ public class Controller {
     }
 @GetMapping ("/Statistiche")
     public Map getStats(@RequestParam(value = "Campo", required = false, defaultValue = "") String nomeCampo) {
-        Statistics stats;
     try {Integer.parseInt(nomeCampo);
-        stats=new NumStatistics(ottieniColonna(nomeCampo,rec));
+        return new NumStatistics(ottieniColonna(nomeCampo,rec)).retResult();
     }catch (NumberFormatException e){
-        stats=new StrStatistics(ottieniColonna(nomeCampo,rec));
-    }
-    return new BasicJsonParser().parseMap("{"+nomeCampo+" : "+stats.toString());
+        return new StrStatistics(ottieniColonna(nomeCampo,rec)).retResult();}
 }
 
 @ExceptionHandler (JsonMappingException.class)
@@ -98,7 +95,7 @@ public String gestisciEccezioni(JsonMappingException e){return "Richiesta POST i
 @PostMapping("/StatisticheFiltrate")
    public Map<String,Object> FilteredStats(@RequestBody  Map<String,Map<String,Object>[]>body,@RequestParam(value = "Campo", required = false, defaultValue = "") String nomeCampo)
 {
-    Statistics stats;
+    
     try {Integer.parseInt(nomeCampo);
         return new NumStatistics(ottieniColonna(nomeCampo,datiFiltrati(body))).retResult();
     }catch (NumberFormatException e){
