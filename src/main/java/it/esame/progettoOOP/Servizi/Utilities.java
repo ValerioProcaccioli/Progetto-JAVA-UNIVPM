@@ -57,8 +57,6 @@ public class Utilities {
         for(String o: list)
         {n=0;
             if(!(risultato.containsKey(o))) {
-            System.out.println(o);
-            System.out.println("aaaaaaaaaaaaaaaaa");
             for (String o1 : list) {
                 if (o.equals(o1)) {
                     n++;
@@ -70,4 +68,27 @@ public class Utilities {
         return risultato;
     }
 
+    public static  <T> List<T> ottieniColonna(String nome, List<Modellante> lista) {
+        List<T> colonna= new ArrayList<>();
+        Object val;
+        for (Modellante m : lista) {
+            val=m.getValori(nome);
+            if (!(val.equals("nnn"))) {
+                colonna.add((T) val);
+            }
+        }
+       return colonna;
+    }
+    public static String[] sort(String[] vettore) {
+        String temp;
+        for (int i = 0; i < vettore.length-1; i++) {
+            for (int j = i+1; j < vettore.length; j++) {
+                if(vettore[j].length()>vettore[i].length())
+                {temp=vettore[j];
+                    vettore[j]=vettore[i];
+                vettore[i]=temp;}
+            }
+        }
+        return vettore;
+    }
 }

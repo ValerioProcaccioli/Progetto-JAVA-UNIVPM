@@ -6,10 +6,10 @@ import it.esame.progettoOOP.Modello.Modellante;
 import it.esame.progettoOOP.Servizi.*;
 
 
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.BasicJsonParser;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.*;
@@ -59,50 +59,49 @@ public class Controller {
         return list;
     }
 
-    public  List ottieniColonna(String nome,List<Modellante> lista) {
-        List<String> colonnas = new ArrayList<>();
-        List<Float> colonnaf= new ArrayList<>();
-        Object val;
-        for (Modellante m : lista) {
-            val=m.getValori(nome);
-            if (!(val.equals("nnn"))) {
-                try{colonnaf.add(Float.parseFloat(val.toString()));}
-                catch (NumberFormatException e){colonnas.add(val.toString());}
-            }
-        }
-        if(!colonnaf.isEmpty())
-        {return colonnaf;}
-        else
-        {return colonnas;}
 
-    }
+@SafeVarargs
 @GetMapping ("/Statistiche")
-    public Map getStats(@RequestParam(value = "Campo", required = false, defaultValue = "") String nomeCampo) {
-    try {Integer.parseInt(nomeCampo);
-        return new NumStatistics(ottieniColonna(nomeCampo,rec)).retResult();
+    public final List<Map<String,Map<String,Object>>> getStats(@RequestParam(value = "Campo", required = false, defaultValue = "") String nomeCampo, @RequestParam(value="nnn",required = false) List<Modellante>... lista) {
+    List<Map<String,Map<String, Object>>> list = new ArrayList<>();
+    if (nomeCampo.equals("")) {
+
+        for (Map<String,Object> map : getMetadata()) {
+            list.add(getOneStats((String) map.get("SourceField"),lista));
+        }
+    } else {
+        list.add(getOneStats(nomeCampo, lista));
+        return list;
+    }
+    return list;
+}
+    @SafeVarargs
+    public final Map<String,Map<String,Object>> getOneStats(String nomeCampo, List<Modellante>... lista){
+        List<Modellante> m=new ArrayList<>();
+        Map<String,Map<String,Object>> map=new HashMap<>();
+        try {
+            for(List<Modellante> m1: lista)
+                m=m1;
+        }catch (NullPointerException e){m=rec;}
+        try {Integer.parseInt(nomeCampo);
+        map.put(nomeCampo,new NumStatistics(Utilities.ottieniColonna(nomeCampo,m)).retResult());
     }catch (NumberFormatException e){
-        return new StrStatistics(ottieniColonna(nomeCampo,rec)).retResult();}
+        map.put(nomeCampo,new StrStatistics(Utilities.ottieniColonna(nomeCampo,m)).retResult());}
+        return map;
 }
 
 @ExceptionHandler (JsonMappingException.class)
-public String gestisciEccezioni(JsonMappingException e){return "Richiesta POST illeggibile. Consultare il readMe per chiarimenti.";}
+public String gestisciEccezioni(JsonMappingException e){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Richiesta POST illeggibile. Consultare il readMe per chiarimenti.");}
 
 @PostMapping ("/DatiFiltrati")
-    public List<Modellante> datiFiltrati(@RequestBody  Map<String,Map<String,Object>[]>body) {
+    public List<Modellante> datiFiltrati(@RequestBody  Map<String,Map<String,Object>[]> body) {
         return new Filter(body).Filtra(rec);
 }
 
 @PostMapping("/StatisticheFiltrate")
-   public Map<String,Object> FilteredStats(@RequestBody  Map<String,Map<String,Object>[]>body,@RequestParam(value = "Campo", required = false, defaultValue = "") String nomeCampo)
+   public List<Map<String,Map<String,Object>>> FilteredStats(@RequestBody  Map<String,Map<String,Object>[]>body,@RequestParam(value = "Campo", required = false, defaultValue = "") String nomeCampo)
 {
-    
-    try {Integer.parseInt(nomeCampo);
-        return new NumStatistics(ottieniColonna(nomeCampo,datiFiltrati(body))).retResult();
-    }catch (NumberFormatException e){
-        return new StrStatistics(ottieniColonna(nomeCampo,datiFiltrati(body))).retResult();
-
-    }
-
+    return getStats(nomeCampo,datiFiltrati(body));
 }
 
 @DeleteMapping ("/RimuoviRecord")
@@ -115,5 +114,31 @@ public String gestisciEccezioni(JsonMappingException e){return "Richiesta POST i
     return rec;
 }
 
-//@PostMapping ("/InserisciRecord")
+@PostMapping ("/InserisciRecord")
+    public List<Modellante> insertRecord(@RequestBody Object[] body) {
+
+    String[] campi = new String[4];
+    int i = 0, j = 0;
+    boolean check=false;
+    for (Map<String, Object> map : getMetadata()) {
+        if (map.containsValue("String")) {
+            campi[i++] = (String) map.get("SourceField");
+        }
+    }
+    Utilities.sort(campi);
+    for (i = 0; i < 4; i++) {
+        if (body[i] instanceof Number || body.length < 4) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "è obbligatorio l'inserimento di tutti i campi stringa");
+        }
+    String[] colonna = Utilities.ottieniColonna(campi[i], rec).toArray(new String[ Utilities.ottieniColonna(campi[i], rec).size()]);
+
+        while (j < colonna.length && ((String) body[i]).compareTo(colonna[j]) > 0)
+    { j++;
+        check=i!=0;}
+}
+if(!check && i==4)
+{ throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "è stato inserito un record già presente, per effettuare questa operazione si prega di rimuovere prima il record da sostituire");}
+System.out.println(j);
+rec.add(j,new Modellante(body));
+   return rec; }
 }

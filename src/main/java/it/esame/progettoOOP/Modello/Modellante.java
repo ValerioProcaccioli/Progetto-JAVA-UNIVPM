@@ -11,16 +11,20 @@ public class Modellante {
 
     private Map<Object,Object> modella=new HashMap<>();
 
-   public Modellante(String[] valori) {
-       modella.put("animals", valori[0]);
-       modella.put("month", valori[1]);
-       modella.put("unit", valori[2]);
-       modella.put("geo", valori[3]);
+   public Modellante(Object[] valori) {
+       modella.put("animals", valori[0].toString());
+       modella.put("month", valori[1].toString());
+       modella.put("unit", valori[2].toString());
+       modella.put("geo", valori[3].toString());
        for (int i = 2019; i > 1968; i--) {
-           if (!(valori[2023-i].charAt(0) ==':'))
-           {
-             try{modella.put(i, Float.parseFloat(valori[2023 - i]));}
-             catch(NumberFormatException e){modella.put(i,Utilities.trasforma(valori[2023-i])); }
+           if ((2023 - i) < valori.length) {
+               if (!((valori[2023 - i].toString()).charAt(0) == ':')) {
+                   try {
+                       modella.put(i, Float.parseFloat(valori[2023 - i].toString()));
+                   } catch (NumberFormatException e) {
+                       modella.put(i, Utilities.trasforma(valori[2023 - i].toString()));
+                   }
+               }
            }
        }
    }
