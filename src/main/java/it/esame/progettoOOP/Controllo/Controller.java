@@ -110,6 +110,11 @@ public String gestisciEccezioni(JsonMappingException e){throw new ResponseStatus
     for(Modellante m: datiFiltrati(body))
     {
         rec.removeIf(m1 -> m1.equals(m));
+        /*for (Modellante m1: rec)
+        {
+            if(m1.equals(m))
+            {rec.remove(m1);}
+        }*/
     }
     return rec;
 }
@@ -138,7 +143,6 @@ public String gestisciEccezioni(JsonMappingException e){throw new ResponseStatus
 }
 if(!check && i==4)
 { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "è stato inserito un record già presente, per effettuare questa operazione si prega di rimuovere prima il record da sostituire");}
-System.out.println(j);
 rec.add(j,new Modellante(body));
    return rec; }
 }

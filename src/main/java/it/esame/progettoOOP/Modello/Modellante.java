@@ -32,7 +32,7 @@ public class Modellante {
        {
            try{
            return modella.getOrDefault(Integer.parseInt(nome), "nnn");}
-           catch (NumberFormatException e){return modella.getOrDefault(nome, "nnn");}
+           catch (NumberFormatException e){return modella.get(nome);}
        }
 
    public Object getRecord(){

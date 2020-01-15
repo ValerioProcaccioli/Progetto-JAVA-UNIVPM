@@ -45,7 +45,7 @@ public List<Modellante> Filtra(List<Modellante> rec) {
             return filtrato;
         }
     }
-    if(rif.get(0) instanceof Number ) {
+    else if(rif.get(0) instanceof Number ) {
         float r = ((Number) rif.get(0)).floatValue();
         float o;
         for (Modellante m : rec) {

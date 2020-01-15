@@ -30,7 +30,6 @@ public class Parsing {
             linea = linea.replace(",", "\t");
             valori = linea.trim().split("\t");
             Modellante temp= new Modellante(valori);
-            temp.getValori("2008");
             record.add(temp);
 
         }
