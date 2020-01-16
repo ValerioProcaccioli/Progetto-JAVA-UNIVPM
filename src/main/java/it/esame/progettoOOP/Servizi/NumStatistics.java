@@ -1,12 +1,11 @@
 package it.esame.progettoOOP.Servizi;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class NumStatistics extends Statistics {
 
-
+/*Il metodo costruttore effettua alla sua chiamata tutte le stistiche numeriche*/
     public NumStatistics(List<Float> list) {
         super(list);
         mappa.put("valore minimo",Utilities.min(list));

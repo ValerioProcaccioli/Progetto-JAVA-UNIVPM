@@ -13,7 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.*;
-
 @RestController
 public class Controller {
     private List<Modellante> rec;
@@ -29,24 +28,27 @@ public class Controller {
         rec=p.getRecord();
     }
 
+    /*Metodo get che resituisce tutti i record del dataset*/
 
     @GetMapping("/Record")
     public List<Modellante> getRecord(){
         return rec;
     }
 
+    /*Metodo get che resituisce il record del dataset corrispondente all'intero passato come parametro*/
     @GetMapping("/Record/{i}")
     public Modellante getRecord(@PathVariable int i) {
         return rec.get(i);
     }
 
+    /*Metodo Get che restituisce i metadata*/
     @GetMapping("/Metadata")
     public List<Map<String,Object>> getMetadata(){
         List<Map<String,Object>> list=new ArrayList<>();
         Set<Object> nomi = new HashSet<>();
         for (int i = 2019; i > 1968; i--)
-            nomi.add(i);
-        for(Object o: (rec.get(0)).getNomi(nomi)) {
+            nomi.add(i);      //si aggiungono all'insieme di nomi tutti gli anni presenti nel dataset
+        for(Object o: (rec.get(0)).getNomi(nomi)) { //si scorre l'insieme definito in precedenza arricchito con i nomi dei campi stringa
             Map<String,Object> meta=new HashMap<>();
             meta.put("Alias", o);
             meta.put("SourceField", o.toString());
@@ -59,12 +61,18 @@ public class Controller {
         return list;
     }
 
-
+/*Metodo che restituisce tutte le statistiche su un campo o su tutti i campi se l'utente non ne passa uno
+specifico come parametro. Il secondo parametro è stato inserito poichè questo metodo può calcolare statistiche sia sul
+dataset originale che sullo stesso sottoposto ad un eventuale fitro. Dato che nel primo caso il metodo viene chiamato
+direttamente dall'utente era necessario che tutti i parametri della funzione fossero inseribili dall'utente,
+anche se in realtà quest'ultimo dovrà inserire solo il primo, mentre il secondo parametro verrà utilizzato solo
+ed esclusivamente nella chiamata di questo metodo contenuta nel corpo del metodo FilteredStats,
+il quale passerà un dataset filtrato*/
 @SafeVarargs
 @GetMapping ("/Statistiche")
-    public final List<Map<String,Map<String,Object>>> getStats(@RequestParam(value = "Campo", required = false, defaultValue = "") String nomeCampo, @RequestParam(value="nnn",required = false) List<Modellante>... lista) {
+    public final List<Map<String,Map<String,Object>>> getStats(@RequestParam(value = "Campo", required = false, defaultValue = "all") String nomeCampo, @RequestParam(value="nnn",required = false) List<Modellante>... lista) {
     List<Map<String,Map<String, Object>>> list = new ArrayList<>();
-    if (nomeCampo.equals("")) {
+    if (nomeCampo.equals("all")) {
 
         for (Map<String,Object> map : getMetadata()) {
             list.add(getOneStats((String) map.get("SourceField"),lista));
@@ -75,6 +83,9 @@ public class Controller {
     }
     return list;
 }
+
+/*Questo metodo restituisce a getStats le statistiche relative ad un singolo campo, le quali possono essere calcolate
+sia sul dataset originale sia sullo stesso sottoposto ad un eventuale fitro.*/
     @SafeVarargs
     public final Map<String,Map<String,Object>> getOneStats(String nomeCampo, List<Modellante>... lista){
         List<Modellante> m=new ArrayList<>();
@@ -82,42 +93,47 @@ public class Controller {
         try {
             for(List<Modellante> m1: lista)
                 m=m1;
-        }catch (NullPointerException e){m=rec;}
-        try {Integer.parseInt(nomeCampo);
+        }catch (NullPointerException e){m=rec;}  //se il parametro lista non è stato passato, la lista su qui calcolare le statistiche è il datset completo
+        try {Integer.parseInt(nomeCampo);//se il nome campo è un anno si chiama il metodo relativa alla classe NumStatistics
         map.put(nomeCampo,new NumStatistics(Utilities.ottieniColonna(nomeCampo,m)).retResult());
-    }catch (NumberFormatException e){
+    }catch (NumberFormatException e){//se invece non lo è si chiama il metodo relativo alla classe StrStatistics
         map.put(nomeCampo,new StrStatistics(Utilities.ottieniColonna(nomeCampo,m)).retResult());}
         return map;
 }
 
+/*Questo è un particolare metodo, utile per segnalare all'utente che ha effettuato una richiesta POST un errore nella
+* sintassi della richiesta senza generare uno stop nell'esecuzione.*/
 @ExceptionHandler (JsonMappingException.class)
 public String gestisciEccezioni(JsonMappingException e){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Richiesta POST illeggibile. Consultare il readMe per chiarimenti.");}
 
+/*Questo metodo restituisce il dataset filtrato tramite il filtro espresso nel body. Da sottolineare che viene
+effettuato un casting del body a Map<String,Map<String,Object>[]> direttamente nella chiamata del metodo (operazione che
+verrà effettuata anche nei successivi due metodi), motivo per il quale si è resa necessario il metodo precedente.*/
 @PostMapping ("/DatiFiltrati")
     public List<Modellante> datiFiltrati(@RequestBody  Map<String,Map<String,Object>[]> body) {
         return new Filter(body).Filtra(rec);
 }
 
+/*Questo metodo restuiscce le statistiche sul dataset filtrato*/
 @PostMapping("/StatisticheFiltrate")
    public List<Map<String,Map<String,Object>>> FilteredStats(@RequestBody  Map<String,Map<String,Object>[]>body,@RequestParam(value = "Campo", required = false, defaultValue = "") String nomeCampo)
 {
     return getStats(nomeCampo,datiFiltrati(body));
 }
 
+/*Questo metodo restituisce il dataset privato delle righe individuate dal filtro*/
 @DeleteMapping ("/RimuoviRecord")
     public List<Modellante> deleteRecord(@RequestBody  Map<String,Map<String,Object>[]>body)
 {
     for(Modellante m: datiFiltrati(body))
     {
-        rec.removeIf(m1 -> m1.equals(m));
-        /*for (Modellante m1: rec)
-        {
-            if(m1.equals(m))
-            {rec.remove(m1);}
-        }*/
+        rec.removeIf(m1 -> m1.equals(m));   //si scorrono tutte le righe del dataset eliminando quelle selezionate dal filtro
     }
     return rec;
 }
+
+/*Questo metodo riceve come parametro un'array di oggetti che verrà convertito in un oggetto della classe modellante
+* il quale verrà poi inserito nel dataset rispettando l'ordine crescente, il dataset modificato verrà restituito.*/
 
 @PostMapping ("/InserisciRecord")
     public List<Modellante> insertRecord(@RequestBody Object[] body) {
@@ -127,11 +143,11 @@ public String gestisciEccezioni(JsonMappingException e){throw new ResponseStatus
     boolean check=false;
     for (Map<String, Object> map : getMetadata()) {
         if (map.containsValue("String")) {
-            campi[i++] = (String) map.get("SourceField");
+            campi[i++] = (String) map.get("SourceField");   //si riempe il vettore campi con i 4 campi stringa
         }
     }
-    Utilities.sort(campi);
-    for (i = 0; i < 4; i++) {
+    Utilities.sort(campi); //il vettore campi viene ordinato nella maniera corretta
+    for (i = 0; i < 4; i++) { //si verifica l'ordine per ognuno dei 4 campi al fine ddi trovare la posizione in cui inserire la nuova riga
         if (body[i] instanceof Number || body.length < 4) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "è obbligatorio l'inserimento di tutti i campi stringa");
         }

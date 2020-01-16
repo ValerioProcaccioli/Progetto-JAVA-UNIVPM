@@ -4,6 +4,7 @@ import java.util.*;
 
 public class StrStatistics extends Statistics{
     private Map<String,Integer> contElem;
+    /*Il metodo costruttore effettua alla sua chiamata tutte le statistiche sulle stringhe*/
         public StrStatistics(List<String> list) {
             super(list);
             contElem=Utilities.contaElem(list);

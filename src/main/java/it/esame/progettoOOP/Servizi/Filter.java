@@ -7,6 +7,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
+/*Una volta creato un oggetto di questa classe, operazione effettuabile passando come parametro il body nella forma corretta,
+* il costruttore ricava da essso i valori da assegnare agli attributi della classe */
 public class Filter {
     private String oper;
     private List<String> campoFiltro=new ArrayList<>();
@@ -24,24 +26,26 @@ public Filter(Map<String,Map<String,Object>[]> body)
 
 }
 
+/*Questo metodo restituisce il dataset filtrato controllando tramite una struttura ad if annidati se una riga del
+* dataset rispetti o meno un filtro*/
 public List<Modellante> Filtra(List<Modellante> rec) {
     List<Modellante> filtrato=new ArrayList<>();
     if(oper.equals("$and")|| oper.equals("$or")) {
-        if (oper.equals("$and")){
+        if (oper.equals("$and")){ //se l'operatore è l'$and viene effettuato un filtraggio del primo campo con l'operatore $eq
         oper = "$eq";
         filtrato = Filtra(rec);
         campoFiltro.add(0, campoFiltro.get(1));
         rif.add(0, rif.get(1));
-        return Filtra(filtrato);
+        return Filtra(filtrato); // la lista ottenuta viene rifilitrata sempre con l'operatore $eq stavolta sul secondo campo, ottenendo così il risultato
         } else {
-            oper = "$eq";
+            oper = "$eq";       //se l'operatore è l'$or viene effettuato un filtraggio del primo campo con l'operatore $eq
             filtrato = Filtra(rec);
             campoFiltro.add(0, campoFiltro.get(1));
             rif.add(0, rif.get(1));
-            filtrato.addAll(Filtra(filtrato));
-            Set<Modellante> temp = new HashSet<>(filtrato);
+            filtrato.addAll(Filtra(filtrato)); //si filtra anche il secondo campo sempre tramite $eq, unendo i risultati dei due filtraggi in una lista
+            Set<Modellante> temp = new HashSet<>(filtrato); //si copia la lista in un set al fine di eliminare le ripetizioni
             filtrato.clear();
-            filtrato.addAll(temp);
+            filtrato.addAll(temp);//viene copiato il set nella lista da restituire
             return filtrato;
         }
     }

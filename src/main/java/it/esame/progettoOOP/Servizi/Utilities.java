@@ -8,13 +8,15 @@ import java.net.URL;
 import java.util.*;
 
 public class Utilities {
+    /*Metodo che apre una connessione con l'url permettendo poi di aprire uno stream di input*/
     public static HttpURLConnection Connect(String url) throws IOException {
         HttpURLConnection open = (HttpURLConnection) new URL(url).openConnection();
         open.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
 
         return open;
     }
-
+/*Metodo che sostituisce i caratteri di disturbo (sempre presenti in fondo al numero)
+con uno 0 che lascia immutato il valore numerico*/
     public static Float trasforma(String numero) {
         return Float.parseFloat(numero.replace(numero.charAt(numero.length() - 1), '0'));
     }
@@ -68,6 +70,8 @@ public class Utilities {
         return risultato;
     }
 
+    /*Metodo che restituisce tutti i valori associati ad uno dei campi del record, viene utilizzato sia per i campi
+    * numerici che per i campi stringa*/
     public static  <T> List<T> ottieniColonna(String nome, List<Modellante> lista) {
         List<T> colonna= new ArrayList<>();
         Object val;
@@ -79,7 +83,9 @@ public class Utilities {
         }
        return colonna;
     }
-    public static String[] sort(String[] vettore) {
+
+    /*Metodo che riordina i quattro campi stringa secondo l'ordinamento presente nel dataset*/
+    public static void sort(String[] vettore) {
         String temp;
         for (int i = 0; i < vettore.length-1; i++) {
             for (int j = i+1; j < vettore.length; j++) {
@@ -89,6 +95,5 @@ public class Utilities {
                 vettore[i]=temp;}
             }
         }
-        return vettore;
     }
 }
