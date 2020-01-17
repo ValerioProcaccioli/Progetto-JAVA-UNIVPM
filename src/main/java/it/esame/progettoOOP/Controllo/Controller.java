@@ -132,8 +132,9 @@ sia sul dataset originale sia sullo stesso sottoposto ad un eventuale fitro.
 public String gestisciEccezioni () { return "Richiesta POST illeggibile. Consultare il readMe per chiarimenti.";}
 
 /**Questo metodo restituisce il dataset filtrato tramite il filtro espresso nel body. Da sottolineare che viene
-effettuato un casting del body a Map<String,Map<String,Object>[]> direttamente nella chiamata del metodo (operazione che
-verrà effettuata anche nei successivi due metodi), motivo per il quale si è resa necessario il metodo precedente.
+effettuato un casting del body ad una mappa avente come chiave una stringa e come valore una lista di mappe,
+ direttamente nella chiamata del metodo (operazione che verrà effettuata anche nei successivi due metodi),
+ motivo per il quale si è resa necessario il metodo precedente.
 
  @param body oggetto json contenente il filtro da applicare
  @return dataset filtrato */
