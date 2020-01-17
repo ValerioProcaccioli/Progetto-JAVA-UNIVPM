@@ -26,8 +26,12 @@ public Filter(Map<String,Map<String,Object>[]> body)
 
 }
 
-/*Questo metodo restituisce il dataset filtrato controllando tramite una struttura ad if annidati se una riga del
-* dataset rispetti o meno un filtro*/
+/**Questo metodo restituisce il dataset filtrato controllando tramite una struttura ad if annidati se una riga del
+* dataset rispetti o meno un filtro
+ *
+ * @param rec lista da filtrare
+ *
+ * @return filtrato lista filtrata*/
 public List<Modellante> Filtra(List<Modellante> rec) {
     List<Modellante> filtrato=new ArrayList<>();
     if(oper.equals("$and")|| oper.equals("$or")) {
@@ -56,7 +60,7 @@ public List<Modellante> Filtra(List<Modellante> rec) {
             if (!(m.getValori(campoFiltro.get(0)).equals("nnn"))) {
                 try {
                     o = (float) m.getValori(campoFiltro.get(0));
-                } catch (NumberFormatException e) {
+                } catch (ClassCastException e) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Non esistono operatori di confronto tra numeri e stringhe");
                 }
                 if (oper.equals("$eq") || oper.equals("$not") || oper.equals("$mag") || oper.equals("$min")) {
@@ -81,22 +85,26 @@ public List<Modellante> Filtra(List<Modellante> rec) {
         }
     }
     else if (rif.get(0) instanceof String) {
+        try {
             String r = (String) rif.get(0);
             for (Modellante m : rec) {
-                String o = (String) m.getValori(campoFiltro.get(0));
-                if (oper.equals("$eq") || oper.equals("$not")) {
-                    if (oper.equals("$eq")) {
-                        if (o.equals(r)) {
+                if (!(m.getValori(campoFiltro.get(0)).equals("nnn"))) {
+                    String o = (String) m.getValori(campoFiltro.get(0));
+                    if (oper.equals("$eq") || oper.equals("$not")) {
+                        if (oper.equals("$eq")) {
+                            if (o.equals(r)) {
+                                filtrato.add(m);
+                            }
+                        } else if (!(o.equals(r))) {
                             filtrato.add(m);
                         }
-                    } else if (!(o.equals(r))) {
-                        filtrato.add(m);
-                    }
-                } else
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operatore non presente o non consentito per i valori forniti.");
+                    } else
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operatore non presente o non consentito per i valori forniti.");
 
+                }
             }
-        } else
+        }catch (ClassCastException e){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Non si possono confrontare numeri con stringhe."); }
+    }else
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Riferimento non accettabile. Il programma supporta un formato stringa o numerico.");
 
         return filtrato;

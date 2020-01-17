@@ -31,12 +31,16 @@ public class Modellante {
            }
        }
    }
-   /*Metodo che restituisce un valore della mappa modella associato ad una chiave passata come parametro*/
+   /**Metodo che restituisce un valore della mappa modella associato ad una chiave passata come parametro
+    *
+    * @param nome nome del campo
+    *
+    * @return  valore associato al nome del campo*/
    public Object getValori(String nome)
        {
            try{
            return modella.getOrDefault(Integer.parseInt(nome), "nnn");}
-           catch (NumberFormatException e){return modella.get(nome);}
+           catch (NumberFormatException e){return modella.getOrDefault(nome,"nnn");}
        }
 
 
@@ -44,8 +48,12 @@ public class Modellante {
        return modella;
    }
 
-   /*Metodo che ricevendo come parametro un set contenente tutti gli anni, al quale vengono aggiunte
-    tutte le chiavi stringa. Il set aggiornato viene restituito*/
+   /**Metodo che ricevendo come parametro un set contenente tutti gli anni, al quale vengono aggiunte
+    tutte le chiavi stringa. Il set aggiornato viene restituito
+
+    @param nomi set contenente tutti gli anni
+
+    @return nomi al set vengono aggiunti i nomi dei campi stringa*/
     public Set<Object> getNomi(Set<Object> nomi) {
         nomi.addAll(modella.keySet());
         return nomi;
